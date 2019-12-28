@@ -12,4 +12,12 @@ else()
     
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+
+find_package(MINI_TEST)
+
 add_executable( ${PROJECT_NAME} main.cpp )
+
+if(MINI_TEST_FOUND)
+	target_include_directories(${PROJECT_NAME} PRIVATE ${MINI_TEST_INCLUDE_DIR})
+endif()
