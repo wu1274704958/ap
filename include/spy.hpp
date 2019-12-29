@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <tuple>
+#include <strstream>
 #include <Windows.h>
 namespace spy{
 
@@ -30,6 +31,10 @@ namespace spy{
         }
     };
 
+    struct GetTextErr : public std::runtime_error {
+        GetTextErr() : std::runtime_error("get text failed!") {}
+    };
+
     class Spy{
     public:
         inline static Spy EnumWindowsByTitleAndCls(const char*tit,const char* cls)
@@ -46,11 +51,17 @@ namespace spy{
                 auto tit = std::get<0>(*p);
                 auto cls = std::get<1>(*p);
                 std::vector<Window> &ws = std::get<2>(*p);
-                std::string title = get_window_text(h);
-                std::string clas = get_class_name(h);
-                if(title == tit && clas == cls)
+                try {
+                    std::string title = get_window_text(h);
+                    std::string clas = get_class_name(h);
+                    if (title == tit && clas == cls)
+                    {
+                        ws.push_back(Window(h, std::move(title), std::move(clas)));
+                    }
+                }
+                catch (GetTextErr e)
                 {
-                    ws.push_back(Window(h,std::move(title),std::move(clas)));
+
                 }
             }
             return TRUE;
@@ -60,14 +71,17 @@ namespace spy{
          std::function<::BOOL(::HWND,std::string&,int)> set_str) noexcept(false)
         {
             std::string title;
-            int l = len(h);
+            int l = len(h) + 1;
             if(l <= 0) return title;
-            title.reserve(l + 1);
-                
+            title.reserve(l);
+            title.resize(l - 1);
             if(!set_str(h,title,l))
             {
-                throw std::runtime_error("get text failed!");
+                throw GetTextErr();
             }
+            int real_len = strlen(title.c_str());
+            if (real_len != l - 1)
+                title = title.c_str();
             return title;
         }
 
@@ -96,6 +110,30 @@ namespace spy{
         Spy(std::vector<Window> ws) : ws(std::move(ws))
         {
 
+        }
+
+        void draw_sign(int idx)
+        {
+            if (idx >= ws.size()) return;
+            int t = 200000;
+            TITLEBARINFO ti;
+            if (!::GetTitleBarInfo(ws[idx].get_hwnd(), &ti))
+                ti.rcTitleBar.bottom = 50;
+            ::HDC dc = ::GetWindowDC(ws[idx].get_hwnd());
+            ::RECT rect = {
+                10,ti.rcTitleBar.bottom,200,200
+            };
+            ::SetDCPenColor(dc, 0xffff0000);
+            ::SetDCBrushColor(dc, 0xffff0000);
+            
+            std::ostrstream ss;
+            ss << std::hex << reinterpret_cast<unsigned long long>(ws[idx].get_hwnd()) << '\0';
+           
+            while (t > 0)
+            {
+                ::DrawTextA(dc, ss.str(), -1, &rect, DT_TOP | DT_LEFT);
+                t -= 1;
+            }
         }
     private:
         Spy(){}
