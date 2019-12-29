@@ -145,6 +145,7 @@ namespace spy{
         {
             if (has(idx))
             {
+                ::ShowWindow(ws[idx].get_hwnd(), SW_SHOWNORMAL);
                 ::SetForegroundWindow(ws[idx].get_hwnd());
             }
         }
