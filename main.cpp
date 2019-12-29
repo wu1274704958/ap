@@ -10,13 +10,19 @@
 
 #include <config.hpp>
 #include <AutoPlay.hpp>
+#include <spy.hpp>
 
 using namespace std;
 using namespace ap;
+using namespace spy;
 namespace fs = std::filesystem;
 
 int main(int argc,char **argv)
 {
+    Spy s = Spy::EnumWindowsByTitleAndCls("无标题 - 记事本","Notepad");
+    auto ws = s.get_windows();
+    dbg(ws.size());
+    return 0;
     if(argc <= 2)
     {
         cout << "invaild parameter!\n";
