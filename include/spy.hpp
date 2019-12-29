@@ -140,6 +140,14 @@ namespace spy{
         {
             return idx >= 0 && idx < ws.size();
         }
+
+        void top(int idx) 
+        {
+            if (has(idx))
+            {
+                ::SetForegroundWindow(ws[idx].get_hwnd());
+            }
+        }
     private:
         Spy(){}
         std::vector<Window> ws;

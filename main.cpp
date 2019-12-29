@@ -35,7 +35,8 @@ int main(int argc,char **argv)
         return -1;
     }
 
-    Spy s = Spy::EnumWindowsByTitleAndCls("无标题 - 记事本","Notepad");
+    //Spy s = Spy::EnumWindowsByTitleAndCls("无标题 - 记事本", "Notepad");
+    Spy s = Spy::EnumWindowsByTitleAndCls("魔兽世界", "GxWindowClass");
     auto ws = s.get_windows();
     dbg(ws.size());
     if (ws.empty())
@@ -72,7 +73,7 @@ int main(int argc,char **argv)
                 choose = wws::parser<int>(ts[1].body);
                 if (!s.has(choose))
                     COUT_DEFAULT_ERR
-                    s.draw_sign(choose);
+                s.draw_sign(choose);
             }
             else
             if (ts[0].body == "go")
@@ -80,7 +81,14 @@ int main(int argc,char **argv)
                 choose = wws::parser<int>(ts[1].body);
                 if (!s.has(choose))
                     COUT_DEFAULT_ERR
-                    break;
+                break;
+            }
+            if (ts[0].body == "top")
+            {
+                choose = wws::parser<int>(ts[1].body);
+                if (!s.has(choose))
+                    COUT_DEFAULT_ERR
+                s.top(choose);
             }
         }catch(...)
             COUT_AND_CONTINUE("Nuknow err!!")
@@ -89,7 +97,7 @@ int main(int argc,char **argv)
     HWND edit = ws[choose].get_hwnd();//(FindWindowA("GxWindowClass","魔兽世界");
     dbg(edit);
 
-    fs::path conf(argv[2]);
+    fs::path conf(argv[1]);
     if(!fs::exists(conf))
     {
         cout << "config not exists!\n";
