@@ -135,6 +135,11 @@ namespace spy{
                 t -= 1;
             }
         }
+
+        bool has(int idx)
+        {
+            return idx >= 0 && idx < ws.size();
+        }
     private:
         Spy(){}
         std::vector<Window> ws;

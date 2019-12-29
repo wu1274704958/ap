@@ -15,23 +15,79 @@
 using namespace std;
 using namespace ap;
 using namespace spy;
+using namespace token;
 namespace fs = std::filesystem;
+
+#define COUT_AND_CONTINUE(s)   \
+{                                           \
+    std::cout << s << "\n";\
+    continue;\
+}
+
+#define COUT_DEFAULT_ERR COUT_AND_CONTINUE("invaild parameter!")
+
 
 int main(int argc,char **argv)
 {
-    Spy s = Spy::EnumWindowsByTitleAndCls("无标题 - 记事本","Notepad");
-    auto ws = s.get_windows();
-    dbg(ws.size());
-    return 0;
-    if(argc <= 2)
+    if (argc <= 1)
     {
         cout << "invaild parameter!\n";
         return -1;
     }
-    string a1(argv[1]);
-    HWND edit = reinterpret_cast<HWND>( wws::parser<long long>(a1,16));//(FindWindowA("GxWindowClass","魔兽世界");
+
+    Spy s = Spy::EnumWindowsByTitleAndCls("无标题 - 记事本","Notepad");
+    auto ws = s.get_windows();
+    dbg(ws.size());
+    if (ws.empty())
+    {
+        std::cout << "Not Find Window!!!" << std::endl;
+        return 0;
+    }
+    for (int i = 0;i < ws.size();++i)
+    {
+        printf("%d: %p\n", i, ws[i].get_hwnd());
+    }
+
+    int choose;
+    
+
+    while (true)
+    {
+        std::string inp;
+        std::cin >> inp;
+        TokenStream<std::string> tsr(inp);
+        tsr.analyse();
+        auto& ts = tsr.tokens;
+        if(ts.empty())
+            COUT_DEFAULT_ERR
+        if (ts[0].body == "exit")
+            return 0;
+        if(ts.size() < 2)
+            COUT_DEFAULT_ERR
+        if (ts[0].body.empty() || ts[1].body.empty())
+            COUT_DEFAULT_ERR
+        try {
+            if (ts[0].body == "ds")
+            {
+                choose = wws::parser<int>(ts[1].body);
+                if (!s.has(choose))
+                    COUT_DEFAULT_ERR
+                    s.draw_sign(choose);
+            }
+            else
+            if (ts[0].body == "go")
+            {
+                choose = wws::parser<int>(ts[1].body);
+                if (!s.has(choose))
+                    COUT_DEFAULT_ERR
+                    break;
+            }
+        }catch(...)
+            COUT_AND_CONTINUE("Nuknow err!!")
+    }
+    
+    HWND edit = ws[choose].get_hwnd();//(FindWindowA("GxWindowClass","魔兽世界");
     dbg(edit);
-    //HWND edit = FindWindowExA(h,NULL,"Edit",NULL);
 
     fs::path conf(argv[2]);
     if(!fs::exists(conf))
