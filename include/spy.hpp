@@ -52,9 +52,11 @@ namespace spy{
                 auto cls = std::get<1>(*p);
                 std::vector<Window> &ws = std::get<2>(*p);
                 try {
-                    std::string title = get_window_text(h);
-                    std::string clas = get_class_name(h);
-                    if (title == tit && clas == cls)
+                    std::string title = tit == nullptr ?  "" : get_window_text(h);
+                    std::string clas = cls == nullptr ? "" : get_class_name(h);
+                    bool tit_eq = tit == nullptr ? true : title == tit;
+                    bool cls_eq = cls == nullptr ? true : clas == cls;
+                    if (tit_eq && cls_eq)
                     {
                         ws.push_back(Window(h, std::move(title), std::move(clas)));
                     }
@@ -153,6 +155,29 @@ namespace spy{
         Spy(){}
         std::vector<Window> ws;
     };
+
+    inline void into_wallpage(HWND self)
+    {
+        auto sp = spy::Spy::EnumWindowsByTitleAndCls(nullptr,"WorkerW");
+        HWND pro = FindWindowA("Progman", nullptr);
+        int result;
+        SendMessageTimeout(pro, 0x052c, 0 ,0, SMTO_NORMAL, 0x3e8,(PDWORD_PTR)&result);
+        auto& ws = sp.get_windows();
+        HWND worker = nullptr;
+        if(!ws.empty())
+        {
+            for(auto w : ws)
+            {
+                if(auto def_v = ::FindWindowExA(w.get_hwnd(),nullptr,"SHELLDLL_DefView",nullptr);def_v != nullptr)
+                {
+                    worker = ::FindWindowExA(nullptr,w.get_hwnd(),"WorkerW",nullptr);
+                }
+            }
+        }
+        if(worker)
+            ::ShowWindow(worker,SW_HIDE);
+        ::SetParent(self,pro);
+    }
 }
 
 #endif 
