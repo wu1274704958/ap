@@ -166,7 +166,7 @@ namespace spy{
         HWND worker = nullptr;
         if(!ws.empty())
         {
-            for(auto w : ws)
+            for(auto& w : ws)
             {
                 if(auto def_v = ::FindWindowExA(w.get_hwnd(),nullptr,"SHELLDLL_DefView",nullptr);def_v != nullptr)
                 {
