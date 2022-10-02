@@ -76,7 +76,7 @@ namespace ap{
             if(key < 1000)
                 sendKeyEvent(key,up_dur);
             else
-                sendMouseKeyEvent(key,up_dur);
+                sendMouseKeyEvent(key - 1000,up_dur);
         }
     };
 }
