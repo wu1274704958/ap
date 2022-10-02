@@ -35,7 +35,7 @@ namespace ap{
             while(kn > 0)
             {
                 int key = rand(0,static_cast<int>(cf.key_pool.size() - 1));
-                sendKeyEvent(cf.key_pool[key],rand(cf.updl,cf.updh));
+                sendKey(cf.key_pool[key],rand(cf.updl,cf.updh));
                 --kn;
                 sleep(rand(cf.sndl,cf.sndh));
             }
@@ -57,10 +57,26 @@ namespace ap{
 
         virtual void sendKeyEvent(int key,int up_dur=1000)
         {
-            dbg(key);
             SendMessageA(h,WM_KEYDOWN,static_cast<WPARAM>(key),NULL);
             sleep(up_dur);
             SendMessageA(h,WM_KEYUP,static_cast<WPARAM>(key),NULL);
+        }
+
+        virtual void sendMouseKeyEvent(int key, int up_dur = 1000)
+        {
+            auto pos = MAKELONG(10,10);
+            SendMessageA(h, WM_LBUTTONDOWN, static_cast<WPARAM>(key), pos);
+            sleep(up_dur);
+            SendMessageA(h, WM_LBUTTONUP, static_cast<WPARAM>(key), pos);
+        }
+
+        virtual void sendKey(int key, int up_dur = 1000)
+        {
+            dbg(key);
+            if(key < 1000)
+                sendKeyEvent(key,up_dur);
+            else
+                sendMouseKeyEvent(key,up_dur);
         }
     };
 }
